@@ -8,6 +8,7 @@ OBJ_DIR     = obj
 INC_DIR     = inc
 
 SRC_FILES   = main.c \
+			  dns.c \
 
 
 OBJ_FILES   = $(SRC_FILES:%.c=$(OBJ_DIR)/%.o)
