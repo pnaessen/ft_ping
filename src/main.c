@@ -9,19 +9,21 @@ int main(int argc, char const **argv)
 	}
 
 
+	struct sockaddr_in sockaddr;
 
 	if(resolve_dns(argv[1], ) != 0) {
 		dprintf(2, "Error in dns resolution\n");
 		return 1;
 	}
 
-	struct sockaddr_in sockaddr;
+	//struct icmphdr test;
+
 	struct addrinfo *addinfo;
 
 	int status = getaddrinfo(argv[1], NULL, NULL, &addinfo);
 	if(status == 0) {
-		struct sockaddr_in* addr_in = (struct sockaddr_in*)addinfo->ai_addr;
-		sockaddr.sin_addr.s_addr = addr_in->sin_addr.s_addr;
+		// struct sockaddr_in* addr_in = (struct sockaddr_in*)addinfo->ai_addr;
+		// sockaddr.sin_addr.s_addr = addr_in->sin_addr.s_addr;
 	}
 
 	freeaddrinfo(addinfo);
