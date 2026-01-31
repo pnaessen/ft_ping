@@ -1,0 +1,10 @@
+ft_ping
+
+obj/
+*.o
+*.d
+
+.vscode/
+.history/
+
+.log
