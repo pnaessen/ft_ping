@@ -17,11 +17,17 @@ int main(int argc, char const **argv)
 
     int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (sockfd < 0) {
-		dprintf(2, "Error creat socket\n");
-		return 1;
+	dprintf(2, "Error creat socket\n");
+	return 1;
     }
-	struct icmphdr test;
+    struct icmphdr icmp_req;
+    setIcmpHdr(&icmp_req);
 
-    printf("Pas de segfault\n");
+    printf("checksum %d\n", icmp_req.checksum);
+    printf("type %d\n", icmp_req.type);
+    printf("code %d\n", icmp_req.code);
+    printf("id %d\n", icmp_req.un.echo.id);
+
+	printf("Pas de segfault\n");
     return 0;
 }
