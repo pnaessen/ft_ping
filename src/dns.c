@@ -3,7 +3,7 @@
 void print_addrinfo_list(struct addrinfo *result)
 {
     int i = 0;
-    char ip_str[INET6_ADDRSTRLEN]; // Support IPv4/IPv6
+    char ip_str[INET6_ADDRSTRLEN];
 
     for (struct addrinfo *ai = result; ai != NULL; ai = ai->ai_next) {
 	printf("=== Nœud %d ===\n", ++i);
@@ -67,7 +67,7 @@ void setIcmpHdr(struct icmphdr *icmp_req)
     icmp_req->code = 0;
     icmp_req->checksum = 0;
     icmp_req->un.echo.id = htons(getpid() & 0xFFFF);
-    icmp_req->checksum = calculate_checksum(icmp_req, 20);
+    icmp_req->checksum = calculate_checksum(icmp_req, 8);
 }
 
 uint16_t calculate_checksum(void *addr, int len)

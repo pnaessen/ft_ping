@@ -21,6 +21,7 @@ int main(int argc, char const **argv)
 	return 1;
     }
     struct icmphdr icmp_req;
+    memset(&icmp_req, 0, sizeof(icmp_req));
     setIcmpHdr(&icmp_req);
 
     printf("checksum %d\n", icmp_req.checksum);
