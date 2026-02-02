@@ -15,8 +15,13 @@ int main(int argc, char const **argv)
 	return 1;
     }
 
+    int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    if (sockfd < 0) {
+		dprintf(2, "Error creat socket\n");
+		return 1;
+    }
+	struct icmphdr test;
 
-	printf("Pas de segfault\n");
+    printf("Pas de segfault\n");
     return 0;
 }
-// struct icmphdr test;

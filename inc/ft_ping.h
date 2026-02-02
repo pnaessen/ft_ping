@@ -12,6 +12,7 @@
 #include <netdb.h>
 #include <netinet/ip_icmp.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 
 typedef struct s_ipHeader
@@ -20,14 +21,14 @@ typedef struct s_ipHeader
 }				t_ipHeader;
 
 
-typedef struct s_icmp_packet
-{
-	uint8_t  type;
-    uint8_t  code;
-    uint16_t checksum;
-    uint16_t id;
-    uint16_t sequence;
-}			   t_icmp_packet;
+// typedef struct s_icmp_packet
+// {
+// 	uint8_t  type;
+//     uint8_t  code;
+//     uint16_t checksum;
+//     uint16_t id;
+//     uint16_t sequence;
+// }			   t_icmp_packet;
 
 int resolve_dns(const char *host, struct sockaddr_in *dest);
 
