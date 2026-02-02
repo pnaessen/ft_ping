@@ -51,23 +51,13 @@ int resolve_dns(const char *host, struct sockaddr_in *dest)
     int err = getaddrinfo(host, NULL, &hints, &result);
     if (err != 0) {
 	dprintf(2, "Error getaddrinfo: %s\n", gai_strerror(err));
-	return 1;
+	return ERR_DNS;
     }
     // print_addrinfo_list(result);
     struct sockaddr_in *addr_in = (struct sockaddr_in *)result->ai_addr;
     dest->sin_addr = addr_in->sin_addr;
     freeaddrinfo(result);
-    return 0;
-}
-
-void setIcmpHdr(struct icmphdr *icmp_req)
-{
-
-    icmp_req->type = ICMP_ECHO;
-    icmp_req->code = 0;
-    icmp_req->checksum = 0;
-    icmp_req->un.echo.id = htons(getpid() & 0xFFFF);
-    icmp_req->checksum = calculate_checksum(icmp_req, 8);
+    return SUCCESS;
 }
 
 uint16_t calculate_checksum(void *addr, int len)
@@ -89,4 +79,20 @@ uint16_t calculate_checksum(void *addr, int len)
     }
 
     return (uint16_t)~sum;
+}
+
+void init_ping_packet(struct s_ping_packet *pkt, uint16_t  seq) {
+    memset(pkt, 0, sizeof(*pkt));
+
+    pkt->hdr.type = ICMP_ECHO;
+    pkt->hdr.code = 0;
+    pkt->hdr.un.echo.id = htons(getpid() & 0xFFFF);
+    pkt->hdr.un.echo.sequence = htons(seq);
+
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    memcpy(pkt->msg, &tv, sizeof(tv));
+
+    pkt->hdr.checksum = 0;
+    pkt->hdr.checksum = calculate_checksum(pkt, sizeof(*pkt));
 }
