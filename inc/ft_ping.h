@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #ifndef FT_PING_HPP
 # define FT_PING_HPP
 
@@ -9,6 +11,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/ip_icmp.h>
+#include <string.h>
 
 
 typedef struct s_ipHeader
