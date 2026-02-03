@@ -2,13 +2,11 @@
 
 void print_stats(struct iphdr *ip, struct icmphdr *icmp, ssize_t bytes)
 {
-	char src_ip[INET_ADDRSTRLEN];
-	inet_ntop(AF_INET, &ip->saddr, src_ip, sizeof(src_ip));
+    char src_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &ip->saddr, src_ip, sizeof(src_ip));
 
-    printf("%ld bytes ", bytes - sizeof(struct iphdr));
-	printf("from %s ", src_ip);
-    printf("icmp_seq=%d ", ntohs(icmp->un.echo.sequence));
-    printf("ttl=%d\n", ip->ttl);
+    printf("%ld bytes from %s icmp_seq=%d ttl=%d time=\n", bytes - sizeof(struct iphdr), src_ip,
+	   ntohs(icmp->un.echo.sequence), ip->ttl);
 }
 
 void print_addrinfo_list(struct addrinfo *result)

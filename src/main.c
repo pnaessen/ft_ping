@@ -30,7 +30,6 @@ int main(int argc, char const **argv)
     while (!g_signal) {
 	if (send_ping(sockfd, &sockaddr, seq) > 0) {
 	}
-	printf("Loop\n");
 	handle_reception(sockfd);
 	seq++;
 	usleep(PING_INTERVAL);
