@@ -11,9 +11,8 @@ void signalHandler(int signum)
 
 void printData(struct s_ping_packet pkt)
 {
-
     struct timeval *tv_ptr = (struct timeval *)pkt.msg;
-    printf("Timestamp : %ld.%06ld | Data : ", tv_ptr->tv_sec, tv_ptr->tv_usec);
+    printf("Timestamp : %ld.%06ld | Data func : ", tv_ptr->tv_sec, tv_ptr->tv_usec);
     for (size_t i = sizeof(struct timeval); i < PING_DATA_S && i < sizeof(pkt.msg); i++) {
 	printf("%c", pkt.msg[i]);
     }
@@ -36,20 +35,26 @@ int main(int argc, char const **argv)
     uint16_t seq = 0;
 
     if (resolve_dns(argv[1], &sockaddr) != 0) {
-	dprintf(2, "Error in dns resolution\n");
+	perror("Error in dns resolution\n");
 	return ERR_DNS;
     }
 
     int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (sockfd < 0) {
-	dprintf(2, "Error creat socket\n");
+	perror("Error creat socket\n");
 	return ERR_SOCKET;
     }
 
     while (g_signal != true) {
 	init_ping_packet(&pkt, seq);
-	printData(pkt);
-	// sendto()
+	printf("Loop\n");
+	// printData(pkt);
+	int bytes =
+	    sendto(sockfd, &pkt, sizeof(pkt), 0, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
+	if (bytes < 0) {
+	    perror("Error bytes send\n");
+	    break;
+	}
 	// recvfrom()
 	seq++;
 	usleep(PING_INTERVAL);
