@@ -1,5 +1,13 @@
 #include "ft_ping.h"
 
+bool g_signal = false;
+
+void signalHandler(int signum) {
+
+    (void)signum;
+    g_signal = true;
+}
+
 int main(int argc, char const **argv)
 {
     if (argc != 2) {
@@ -8,9 +16,12 @@ int main(int argc, char const **argv)
 	return 1;
     }
 
+    signal(SIGINT, signalHandler);
+    signal(SIGQUIT, signalHandler);
+
     t_ping_packet pkt;
     struct sockaddr_in sockaddr;
-    uint16_t  seq = 0;
+    uint16_t seq = 0;
 
     if (resolve_dns(argv[1], &sockaddr) != 0) {
 	dprintf(2, "Error in dns resolution\n");
@@ -23,14 +34,16 @@ int main(int argc, char const **argv)
 	return ERR_SOCKET;
     }
 
-    while (/*signal up*/ true) {
+    while (g_signal != true) {
 	init_ping_packet(&pkt, seq);
 	// sendto()
 	// recvfrom()
 	seq++;
-    usleep(PING_INTERVAL);
+	usleep(PING_INTERVAL);
+	printf("pkt msg: %s\n", pkt.msg);
     }
 
+    close(sockfd);
     // printf("checksum %d\n", icmp_req.checksum);
     // printf("type %d\n", icmp_req.type);
     // printf("code %d\n", icmp_req.code);

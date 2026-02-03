@@ -24,6 +24,9 @@ $(NAME): $(OBJ_FILES)
 run: all
 	sudo ./$(NAME) $(DEST)
 
+valgrind: all
+	sudo valgrind --track-fds=yes ./$(NAME) $(DEST)
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(OBJ_DIR)
 	$(CC) $(CFLAGS) -MMD -c $< -o $@

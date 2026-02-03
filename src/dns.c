@@ -81,7 +81,8 @@ uint16_t calculate_checksum(void *addr, int len)
     return (uint16_t)~sum;
 }
 
-void init_ping_packet(struct s_ping_packet *pkt, uint16_t  seq) {
+void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq)
+{
     memset(pkt, 0, sizeof(*pkt));
 
     pkt->hdr.type = ICMP_ECHO;
@@ -92,6 +93,10 @@ void init_ping_packet(struct s_ping_packet *pkt, uint16_t  seq) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     memcpy(pkt->msg, &tv, sizeof(tv));
+
+    for (size_t i = sizeof(t_ping_packet); i < PING_DATA_S; i++) {
+        pkt->msg[i] = i;
+    }
 
     pkt->hdr.checksum = 0;
     pkt->hdr.checksum = calculate_checksum(pkt, sizeof(*pkt));

@@ -12,19 +12,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+# include <signal.h>
 
 #define ERR_DNS -1
 #define ERR_SOCKET -2
 #define SUCCESS 0
 
 #define PING_PKT_S 64
+#define PING_DATA_S (PING_PKT_S - sizeof(struct icmphdr))
 #define PING_INTERVAL 1000000
 
 typedef struct s_ping_packet {
     struct icmphdr hdr;
-    char msg[PING_PKT_S];
+    char msg[PING_DATA_S];
 } t_ping_packet;
 
 int resolve_dns(const char *host, struct sockaddr_in *dest);
