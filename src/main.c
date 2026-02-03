@@ -30,7 +30,6 @@ int main(int argc, char const **argv)
     signal(SIGINT, signalHandler);
     signal(SIGQUIT, signalHandler);
 
-    t_ping_packet pkt;
     struct sockaddr_in sockaddr;
     uint16_t seq = 0;
 
@@ -46,15 +45,10 @@ int main(int argc, char const **argv)
     }
 
     while (!g_signal) {
-	init_ping_packet(&pkt, seq);
-	printf("Loop\n");
-	// printData(pkt);
-	int bytes_send =
-	    sendto(sockfd, &pkt, sizeof(pkt), 0, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
-	if (bytes_send < 0) {
-	    perror("Error bytes send\n");
-	    break;
+	if (send_ping(sockfd, &sockaddr, seq) > 0) {
 	}
+
+	printf("Loop\n");
 	char recv_buffer[128];
 	struct sockaddr_in recv;
 	socklen_t from_len = sizeof(recv);
@@ -69,11 +63,5 @@ int main(int argc, char const **argv)
     }
 
     close(sockfd);
-    // printf("checksum %d\n", icmp_req.checksum);
-    // printf("type %d\n", icmp_req.type);
-    // printf("code %d\n", icmp_req.code);
-    // printf("id %d\n", icmp_req.un.echo.id);
-
-    printf("Pas de segfault\n");
     return SUCCESS;
 }
