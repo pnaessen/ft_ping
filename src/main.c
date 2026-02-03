@@ -2,10 +2,22 @@
 
 bool g_signal = false;
 
-void signalHandler(int signum) {
+void signalHandler(int signum)
+{
 
     (void)signum;
     g_signal = true;
+}
+
+void printData(struct s_ping_packet pkt)
+{
+
+    struct timeval *tv_ptr = (struct timeval *)pkt.msg;
+    printf("Timestamp : %ld.%06ld | Data : ", tv_ptr->tv_sec, tv_ptr->tv_usec);
+    for (size_t i = sizeof(struct timeval); i < PING_DATA_S && i < sizeof(pkt.msg); i++) {
+	printf("%c", pkt.msg[i]);
+    }
+    printf("\n");
 }
 
 int main(int argc, char const **argv)
@@ -36,11 +48,11 @@ int main(int argc, char const **argv)
 
     while (g_signal != true) {
 	init_ping_packet(&pkt, seq);
+	printData(pkt);
 	// sendto()
 	// recvfrom()
 	seq++;
 	usleep(PING_INTERVAL);
-	printf("pkt msg: %s\n", pkt.msg);
     }
 
     close(sockfd);

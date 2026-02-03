@@ -94,8 +94,8 @@ void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq)
     gettimeofday(&tv, NULL);
     memcpy(pkt->msg, &tv, sizeof(tv));
 
-    for (size_t i = sizeof(t_ping_packet); i < PING_DATA_S; i++) {
-        pkt->msg[i] = i;
+    for (size_t i = sizeof(struct timeval); i < PING_DATA_S; i++) {
+	pkt->msg[i] = i;
     }
 
     pkt->hdr.checksum = 0;
