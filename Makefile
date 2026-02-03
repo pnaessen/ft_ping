@@ -12,6 +12,7 @@ SRC_FILES   = main.c \
 			  request.c \
 			  receiver.c \
 			  display.c \
+			  signal.c \
 
 
 OBJ_FILES   = $(SRC_FILES:%.c=$(OBJ_DIR)/%.o)

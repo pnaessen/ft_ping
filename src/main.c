@@ -2,23 +2,6 @@
 
 bool g_signal = false;
 
-void signalHandler(int signum)
-{
-
-    (void)signum;
-    g_signal = true;
-}
-
-void printData(struct s_ping_packet pkt)
-{
-    struct timeval *tv_ptr = (struct timeval *)pkt.msg;
-    printf("Timestamp : %ld.%06ld | Data func : ", tv_ptr->tv_sec, tv_ptr->tv_usec);
-    for (size_t i = sizeof(struct timeval); i < PING_DATA_S && i < sizeof(pkt.msg); i++) {
-	printf("%c", pkt.msg[i]);
-    }
-    printf("\n");
-}
-
 int main(int argc, char const **argv)
 {
     if (argc != 2) {
