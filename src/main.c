@@ -45,17 +45,25 @@ int main(int argc, char const **argv)
 	return ERR_SOCKET;
     }
 
-    while (g_signal != true) {
+    while (!g_signal) {
 	init_ping_packet(&pkt, seq);
 	printf("Loop\n");
 	// printData(pkt);
-	int bytes =
+	int bytes_send =
 	    sendto(sockfd, &pkt, sizeof(pkt), 0, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
-	if (bytes < 0) {
+	if (bytes_send < 0) {
 	    perror("Error bytes send\n");
 	    break;
 	}
-	// recvfrom()
+	char recv_buffer[128];
+	struct sockaddr_in recv;
+	socklen_t from_len = sizeof(recv);
+	int bytes_recv = recvfrom(sockfd, recv_buffer, sizeof(recv_buffer), 0,
+				  (struct sockaddr *)&recv, &from_len);
+	if (bytes_recv < 0) {
+	    perror("Error bytes recv\n");
+	    break;
+	}
 	seq++;
 	usleep(PING_INTERVAL);
     }
