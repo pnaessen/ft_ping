@@ -47,17 +47,8 @@ int main(int argc, char const **argv)
     while (!g_signal) {
 	if (send_ping(sockfd, &sockaddr, seq) > 0) {
 	}
-
 	printf("Loop\n");
-	char recv_buffer[128];
-	struct sockaddr_in recv;
-	socklen_t from_len = sizeof(recv);
-	int bytes_recv = recvfrom(sockfd, recv_buffer, sizeof(recv_buffer), 0,
-				  (struct sockaddr *)&recv, &from_len);
-	if (bytes_recv < 0) {
-	    perror("Error bytes recv\n");
-	    break;
-	}
+	handle_reception(sockfd);
 	seq++;
 	usleep(PING_INTERVAL);
     }
