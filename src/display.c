@@ -1,72 +1,43 @@
 #include "ft_ping.h"
 
-void print_stats(struct iphdr *ip, struct icmphdr *icmp, ssize_t bytes)
+double calculate_rtt(struct icmphdr *icmp)
 {
-    char src_ip[INET_ADDRSTRLEN];
     struct timeval end_time;
+    struct timeval *start_time;
 
     gettimeofday(&end_time, NULL);
-    inet_ntop(AF_INET, &ip->saddr, src_ip, sizeof(src_ip));
+    start_time = (struct timeval *)((char *)icmp + sizeof(struct icmphdr));
 
-    struct timeval *start_time = (struct timeval *)((char *)icmp + sizeof(struct icmphdr));
-    printf("%ld bytes from %s icmp_seq=%d ttl=%d", bytes - (ip->ihl * 4), src_ip,
-	   ntohs(icmp->un.echo.sequence), ip->ttl);
-    calculate_rtt(start_time, &end_time);
+    return ((end_time.tv_sec - start_time->tv_sec) * 1000.0) +
+	   ((end_time.tv_usec - start_time->tv_usec) / 1000.0);
 }
 
-void calculate_rtt(struct timeval *start, struct timeval *end)
+void print_packet_info(t_ping *ping, struct iphdr *ip, struct icmphdr *icmp, double rtt,
+			      ssize_t bytes)
 {
-    double ms;
-
-    long seconds = end->tv_sec - start->tv_sec;
-    long microseconds = end->tv_usec - start->tv_usec;
-
-    ms = (seconds * 1000.0) + (microseconds / 1000.0);
-    printf(" time=%.3f ms\n", ms);
+    printf("%ld bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", bytes - (ip->ihl * 4),
+	   ping->target_ip, ntohs(icmp->un.echo.sequence), ip->ttl, rtt);
 }
 
-void print_addrinfo_list(struct addrinfo *result)
+void print_final_stats(t_ping *ping)
 {
-    int i = 0;
-    char ip_str[INET6_ADDRSTRLEN];
+    printf("\n--- %s ping statistics ---\n", ping->target_host);
 
-    for (struct addrinfo *ai = result; ai != NULL; ai = ai->ai_next) {
-	printf("=== Nœud %d ===\n", ++i);
-	printf("ai_flags: 0x%x\n", ai->ai_flags);
-	printf("ai_family: %d (%s)\n", ai->ai_family,
-	       ai->ai_family == AF_INET	   ? "AF_INET"
-	       : ai->ai_family == AF_INET6 ? "AF_INET6"
-					   : "Autre");
-	printf("ai_socktype: %d (%s)\n", ai->ai_socktype,
-	       ai->ai_socktype == SOCK_STREAM  ? "SOCK_STREAM"
-	       : ai->ai_socktype == SOCK_DGRAM ? "SOCK_DGRAM"
-	       : ai->ai_socktype == SOCK_RAW   ? "SOCK_RAW"
-					       : "Autre");
-	printf("ai_protocol: %d\n", ai->ai_protocol);
-	printf("ai_addrlen: %d\n", (int)ai->ai_addrlen);
+    long lost = ping->stats.pkts_transmitted - ping->stats.pkts_received;
+    int loss_percent = (ping->stats.pkts_transmitted == 0)
+			   ? 0
+			   : (int)((lost * 100) / ping->stats.pkts_transmitted);
 
-	if (ai->ai_canonname) {
-	    printf("ai_canonname: %s\n", ai->ai_canonname);
-	} else {
-	    printf("ai_canonname: NULL\n");
-	}
+    printf("%ld packets transmitted, %ld packets received, %d%% packet loss\n",
+	   ping->stats.pkts_transmitted, ping->stats.pkts_received, loss_percent);
 
-	if (ai->ai_addr) {
-	    inet_ntop(ai->ai_family, ai->ai_addr, ip_str, sizeof(ip_str));
-	    printf("ai_addr: %s\n", ip_str);
-	} else {
-	    printf("ai_addr: NULL\n");
-	}
-	printf("\n");
+    if (ping->stats.pkts_received > 0) {
+	double avg = ping->stats.sum_rtt / ping->stats.pkts_received;
+
+	double variance = (ping->stats.sum_sq_rtt / ping->stats.pkts_received) - (avg * avg);
+	double mdev = sqrt(variance); 
+
+	printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", ping->stats.min_rtt, avg,
+	       ping->stats.max_rtt, mdev);
     }
-}
-
-void printData(struct s_ping_packet pkt)
-{
-    struct timeval *tv_ptr = (struct timeval *)pkt.msg;
-    printf("Timestamp : %ld.%06ld | Data func : ", tv_ptr->tv_sec, tv_ptr->tv_usec);
-    for (size_t i = sizeof(struct timeval); i < PING_DATA_S && i < sizeof(pkt.msg); i++) {
-	printf("%c", pkt.msg[i]);
-    }
-    printf("\n");
 }
