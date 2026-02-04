@@ -27,6 +27,15 @@ int main(int argc, char const **argv)
 	return ERR_SOCKET;
     }
 
+    struct timeval tv;
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+
+    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+	perror("setsockopt timeout");
+	return ERR_SOCKET;
+    }
+
     while (!g_signal) {
 	if (send_ping(sockfd, &sockaddr, seq) > 0) {
 	}
