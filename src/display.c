@@ -3,10 +3,26 @@
 void print_stats(struct iphdr *ip, struct icmphdr *icmp, ssize_t bytes)
 {
     char src_ip[INET_ADDRSTRLEN];
+    struct timeval end_time;
+
+    gettimeofday(&end_time, NULL);
     inet_ntop(AF_INET, &ip->saddr, src_ip, sizeof(src_ip));
 
-    printf("%ld bytes from %s icmp_seq=%d ttl=%d time=\n", bytes - sizeof(struct iphdr), src_ip,
+    struct timeval *start_time = (struct timeval *)((char *)icmp + sizeof(struct icmphdr));
+    printf("%ld bytes from %s icmp_seq=%d ttl=%d", bytes - (ip->ihl * 4), src_ip,
 	   ntohs(icmp->un.echo.sequence), ip->ttl);
+    calculate_rtt(start_time, &end_time);
+}
+
+void calculate_rtt(struct timeval *start, struct timeval *end)
+{
+    double ms;
+
+    long seconds = end->tv_sec - start->tv_sec;
+    long microseconds = end->tv_usec - start->tv_usec;
+
+    ms = (seconds * 1000.0) + (microseconds / 1000.0);
+    printf(" time=%.3f ms\n", ms);
 }
 
 void print_addrinfo_list(struct addrinfo *result)

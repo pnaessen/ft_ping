@@ -40,6 +40,7 @@ ssize_t send_ping(int sockfd, struct sockaddr_in *dest, uint16_t seq);
 void handle_reception(int sockfd);
 
 void print_stats(struct iphdr *ip, struct icmphdr *icmp, ssize_t bytes);
+void calculate_rtt(struct timeval *start, struct timeval *end);
 
 void signalHandler(int signum);
 #endif /* FT_PING_H */
