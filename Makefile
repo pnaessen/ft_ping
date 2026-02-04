@@ -23,7 +23,7 @@ DEST        ?= google.com
 all: $(NAME)
 
 $(NAME): $(OBJ_FILES)
-	$(CC) $(CFLAGS) $(OBJ_FILES) -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJ_FILES) -o $(NAME) -lm
 
 run: all
 	sudo ./$(NAME) $(DEST)
