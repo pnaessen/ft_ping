@@ -1,15 +1,50 @@
 #include "ft_ping.h"
 
-ssize_t send_ping(int sockfd, struct sockaddr_in *dest, uint16_t seq)
+ssize_t send_ping(int sockfd, struct sockaddr_in *dest, t_ping *ping)
 {
-    t_ping_packet pkt;
-    init_ping_packet(&pkt, seq);
-    int bytes_send = sendto(sockfd, &pkt, sizeof(pkt), 0, (struct sockaddr *)dest, sizeof(*dest));
-    if (bytes_send < 0) {
-	perror("Error bytes send\n");
+
+    uint8_t packet[IP_MAXPACKET];
+    struct icmphdr *icmp;
+
+    size_t total_size = sizeof(struct icmphdr) + ping->packet_size;
+
+    if (total_size > sizeof(packet)) {
+	fprintf(stderr, "ft_ping: packet size too large\n");
 	return -1;
     }
-    return bytes_send;
+
+    icmp = (struct icmphdr *)packet;
+
+    icmp->type = ICMP_ECHO;
+    icmp->code = 0;
+    icmp->un.echo.id = htons(getpid() & 0xFFFF);
+    icmp->un.echo.sequence = htons(ping->seq);
+    icmp->checksum = 0;
+
+    char *data = (char *)(packet + sizeof(struct icmphdr));
+
+    for (int i = 0; i < ping->packet_size; i++) {
+	data[i] = i % 256;
+    }
+
+    if (ping->packet_size >= (int)sizeof(struct timeval)) {
+	struct timeval now;
+	gettimeofday(&now, NULL);
+	memcpy(data, &now, sizeof(now));
+    }
+
+    icmp->checksum = calculate_checksum(packet, total_size);
+
+    ssize_t bytes_sent =
+	sendto(sockfd, packet, total_size, 0, (struct sockaddr *)dest, sizeof(*dest));
+
+    if (bytes_sent < 0) {
+	if (ping->verbose)
+	    perror("ft_ping: sendto");
+	return -1;
+    }
+
+    return bytes_sent;
 }
 
 void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq)

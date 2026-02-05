@@ -2,12 +2,23 @@
 
 bool g_signal = false;
 
-void init_ping_struct(t_ping *ping, const char *host)
+void init_ping_struct(t_ping *ping)
 {
     memset(ping, 0, sizeof(t_ping));
-    ping->target_host = (char *)host;
+
+    ping->target_host = NULL;
+    ping->ttl = 64;
+    ping->packet_size = 56;
+    ping->count = -1;
+    ping->timeout = -1;
+    ping->interval = 1.0;
+    ping->verbose = false;
+    ping->flood = false;
+
     ping->stats.min_rtt = DBL_MAX;
     ping->stats.max_rtt = 0.0;
+    ping->stats.pkts_transmitted = 0;
+    ping->stats.pkts_received = 0;
 }
 
 int setup_socket(t_ping *ping)
@@ -33,40 +44,56 @@ int main(int argc, char **argv)
 {
     t_ping ping;
 
-    if (argc != 2) {
-	dprintf(2, "Usage: %s <host>\n", argv[0]);
-	return 1;
+    if (getuid() != 0) {
+	fprintf(stderr, "ft_ping: Lacking privilege for raw socket.\n");
+	return (EXIT_FAILURE);
+    }
+
+    init_ping_struct(&ping);
+
+    if (parse_args(argc, argv, &ping) != 0) {
+	// usage();
+	return (EXIT_FAILURE);
     }
 
     signal(SIGINT, signalHandler);
-    init_ping_struct(&ping, argv[1]);
-    if (parse_args(argc, argv, &ping) != 0) {
-	usage(argv[1]);
-	return 1;
+
+    if (ping.timeout > 0) {
+	signal(SIGALRM, signalHandler);
+	alarm(ping.timeout);
     }
 
-    if (resolve_dns(ping.target_host, &ping.dest_addr) != 0)
-	return ERR_DNS;
+    if (resolve_dns(ping.target_host, &ping.dest_addr) != 0) {
+	return (ERR_DNS);
+    }
 
     inet_ntop(AF_INET, &ping.dest_addr.sin_addr, ping.target_ip, sizeof(ping.target_ip));
 
-    if (setup_socket(&ping) < 0)
-	return ERR_SOCKET;
+    if (setup_socket(&ping) < 0) {
+	return (ERR_SOCKET);
+    }
 
     while (!g_signal) {
-	if (send_ping(ping.sockfd, &ping.dest_addr, ping.seq) > 0) {
+	if (send_ping(ping.sockfd, &ping.dest_addr, &ping) > 0) {
 	    ping.stats.pkts_transmitted++;
 	} else {
-	    // TODO: print error or maybe not
+	    // Error
 	}
 
 	handle_reception(&ping);
+
+	if (ping.count > 0 && ping.stats.pkts_transmitted >= ping.count) {
+	    break;
+	}
 	ping.seq++;
-	usleep(PING_INTERVAL);
+
+	if (!ping.flood && !g_signal) {
+	    usleep((useconds_t)(ping.interval * 1000000));
+	}
     }
 
     print_final_stats(&ping);
     close(ping.sockfd);
 
-    return SUCCESS;
+    return (SUCCESS);
 }

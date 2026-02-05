@@ -43,24 +43,36 @@ typedef struct s_stats {
 } t_stats;
 
 typedef struct s_ping {
-    int sockfd;
-    struct sockaddr_in dest_addr;
     char *target_host;
-    char target_ip[INET_ADDRSTRLEN];
-    uint16_t seq;
+    double interval;
+
     t_stats stats;
 
-    bool verbose; //  -v
-    int ttl;	  //  -t
-    int count;	  //  -c
+    long count; // -c
+
+    struct sockaddr_in dest_addr;
+
+    char target_ip[INET_ADDRSTRLEN];
+
+    int sockfd;
+    int ttl;	     // -t
+    int packet_size; // -s
+    int timeout;     // -w
+
+    uint16_t seq;
+
+    bool verbose;      // -v
+    bool flood;	       // -f
+    bool record_route; // -r
+
+    // theorie 5 bytes de padding
 } t_ping;
 
 int resolve_dns(const char *host, struct sockaddr_in *dest);
 
 void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq);
 uint16_t calculate_checksum(void *addr, int len);
-ssize_t send_ping(int sockfd, struct sockaddr_in *dest, uint16_t seq);
-
+ssize_t send_ping(int sockfd, struct sockaddr_in *dest, t_ping *ping);
 void handle_reception(t_ping *ping);
 
 double calculate_rtt(struct icmphdr *icmp);
@@ -71,6 +83,6 @@ void update_stats(t_ping *ping, double rtt);
 void print_packet_info(t_ping *ping, struct iphdr *ip, struct icmphdr *icmp, double rtt,
 		       ssize_t bytes);
 
-int parse_args(int argc,char **argv, t_ping *ping);
+int parse_args(int argc, char **argv, t_ping *ping);
 void usage(const char *exec);
 #endif /* FT_PING_H */
