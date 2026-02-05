@@ -82,8 +82,12 @@ int main(int argc, char **argv)
     while (!g_signal) {
 	if (send_ping(ping.sockfd, &ping.dest_addr, &ping) > 0) {
 	    ping.stats.pkts_transmitted++;
+	    if (ping.flood) {
+		write(1, ".", 1);
+	    }
 	} else {
-	    // Error
+	    if (ping.flood)
+		write(1, "E", 1);
 	}
 
 	handle_reception(&ping);
