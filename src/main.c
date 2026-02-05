@@ -31,8 +31,14 @@ int setup_socket(t_ping *ping)
 	return -1;
     }
 
+    if (setsockopt(ping->sockfd, IPPROTO_IP, IP_TTL, &ping->ttl, sizeof(ping->ttl)) < 0) {
+	perror("setsockopt IP_TTL");
+	close(ping->sockfd);
+	return -1;
+    }
+
     if (setsockopt(ping->sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
-	perror("setsockopt");
+	perror("setsockopt SO_RCVTIMEO");
 	close(ping->sockfd);
 	return -1;
     }
