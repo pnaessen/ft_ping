@@ -13,6 +13,7 @@ SRC_FILES   = main.c \
 			  receiver.c \
 			  display.c \
 			  signal.c \
+			  parsing.c \
 
 
 OBJ_FILES   = $(SRC_FILES:%.c=$(OBJ_DIR)/%.o)

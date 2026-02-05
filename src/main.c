@@ -29,7 +29,7 @@ int setup_socket(t_ping *ping)
     return 0;
 }
 
-int main(int argc, char const **argv)
+int main(int argc, char **argv)
 {
     t_ping ping;
 
@@ -40,6 +40,10 @@ int main(int argc, char const **argv)
 
     signal(SIGINT, signalHandler);
     init_ping_struct(&ping, argv[1]);
+    if (parse_args(argc, argv, &ping) != 0) {
+	usage(argv[1]);
+	return 1;
+    }
 
     if (resolve_dns(ping.target_host, &ping.dest_addr) != 0)
 	return ERR_DNS;

@@ -17,7 +17,6 @@ int resolve_dns(const char *host, struct sockaddr_in *dest)
 	dprintf(2, "Error getaddrinfo: %s\n", gai_strerror(err));
 	return ERR_DNS;
     }
-    // print_addrinfo_list(result);
     struct sockaddr_in *addr_in = (struct sockaddr_in *)result->ai_addr;
     dest->sin_addr = addr_in->sin_addr;
     freeaddrinfo(result);

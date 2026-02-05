@@ -49,6 +49,10 @@ typedef struct s_ping {
     char target_ip[INET_ADDRSTRLEN];
     uint16_t seq;
     t_stats stats;
+
+    bool verbose; //  -v
+    int ttl;	  //  -t
+    int count;	  //  -c
 } t_ping;
 
 int resolve_dns(const char *host, struct sockaddr_in *dest);
@@ -66,4 +70,7 @@ void print_final_stats(t_ping *ping);
 void update_stats(t_ping *ping, double rtt);
 void print_packet_info(t_ping *ping, struct iphdr *ip, struct icmphdr *icmp, double rtt,
 		       ssize_t bytes);
+
+int parse_args(int argc,char **argv, t_ping *ping);
+void usage(const char *exec);
 #endif /* FT_PING_H */
