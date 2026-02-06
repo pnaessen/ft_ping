@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     signal(SIGINT, signalHandler);
     init_ping_struct(&ping);
     if (parse_args(argc, argv, &ping) != 0) {
-	usage(argv[1]);
+	usage(argv[0]);
 	return 1;
     }
 
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
     inet_ntop(AF_INET, &ping.dest_addr.sin_addr, ping.target_ip, sizeof(ping.target_ip));
 
-    //TODO: REFACTO
+    // TODO: REFACTO
     if (ping.type == ICMP_TIMESTAMP) {
 	printf("PING %s (%s): sending timestamp requests\n", ping.target_host, ping.target_ip);
     } else {
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 	usleep(PING_INTERVAL);
     }
 
-	print_final_stats(&ping);
+    print_final_stats(&ping);
     close(ping.sockfd);
 
     return SUCCESS;
