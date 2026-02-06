@@ -32,16 +32,28 @@ void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq, int type)
     pkt->hdr.un.echo.id = htons(getpid() & 0xFFFF);
     pkt->hdr.un.echo.sequence = htons(seq);
 
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    memcpy(pkt->msg, &tv, sizeof(tv));
+    if (type == ICMP_TIMESTAMP) {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
 
-    for (size_t i = sizeof(struct timeval); i < PING_DATA_S; i++) {
-	pkt->msg[i] = i;
+	uint32_t ms_since_midnight = (tv.tv_sec % 86400) * 1000 + (tv.tv_usec / 1000);
+
+	uint32_t *ptr = (uint32_t *)pkt->msg;
+	ptr[0] = htonl(ms_since_midnight);
+	ptr[1] = 0;
+	ptr[2] = 0;
+
+	pkt->hdr.checksum = calculate_checksum(pkt, sizeof(struct icmphdr) + 12);
+    } else {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	memcpy(pkt->msg, &tv, sizeof(tv));
+
+	for (size_t i = sizeof(struct timeval); i < PING_DATA_S; i++) {
+	    pkt->msg[i] = i;
+	}
+	pkt->hdr.checksum = calculate_checksum(pkt, sizeof(*pkt));
     }
-
-    pkt->hdr.checksum = 0;
-    pkt->hdr.checksum = calculate_checksum(pkt, sizeof(*pkt));
 }
 
 uint16_t calculate_checksum(void *addr, int len)

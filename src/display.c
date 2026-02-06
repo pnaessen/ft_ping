@@ -13,7 +13,7 @@ double calculate_rtt(struct icmphdr *icmp)
 }
 
 void print_packet_info(t_ping *ping, struct iphdr *ip, struct icmphdr *icmp, double rtt,
-			      ssize_t bytes)
+		       ssize_t bytes)
 {
     printf("%ld bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", bytes - (ip->ihl * 4),
 	   ping->target_ip, ntohs(icmp->un.echo.sequence), ip->ttl, rtt);

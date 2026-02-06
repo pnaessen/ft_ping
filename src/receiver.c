@@ -39,7 +39,7 @@ void handle_reception(t_ping *ping)
 	    update_stats(ping, rtt);
 	    print_packet_info(ping, ip, icmp, rtt, bytes);
 	    return;
-	} else if (icmp->type == ICMP_TIMESTAMP) {
+	} else if (icmp->type == ICMP_TIMESTAMPREPLY) {
 
 	    if (ntohs(icmp->un.echo.id) != (getpid() & 0xFFFF))
 		continue;
@@ -56,7 +56,7 @@ void handle_reception(t_ping *ping)
 		uint32_t rtime = ntohl(ptr[1]);
 		uint32_t ttime = ntohl(ptr[2]);
 
-		printf("%ld bytes from %s: type=TIMESTAMP_REPLY\n", bytes - (ip->ihl * 4), sender);
+		printf("%ld bytes from %s: icmp_seq=%d\n", bytes, sender, ntohs(icmp->un.echo.sequence));
 		printf("icmp_otime = %u\n", otime);
 		printf("icmp_rtime = %u\n", rtime);
 		printf("icmp_ttime = %u\n", ttime);
@@ -75,6 +75,6 @@ void handle_reception(t_ping *ping)
 
 	    return;
 	}
-	printf("icmp type resp:%d\n ",icmp->type);
+	// printf("icmp type resp:%d\n ", icmp->type);
     }
 }
