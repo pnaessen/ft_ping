@@ -12,6 +12,7 @@ void update_stats(t_ping *ping, double rtt)
 	ping->stats.max_rtt = rtt;
 }
 
+//TODO: REFACTO THIS 
 void handle_reception(t_ping *ping)
 {
     char buffer[512];
@@ -75,6 +76,5 @@ void handle_reception(t_ping *ping)
 
 	    return;
 	}
-	// printf("icmp type resp:%d\n ", icmp->type);
     }
 }

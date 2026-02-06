@@ -60,6 +60,7 @@ int main(int argc, char **argv)
 
     inet_ntop(AF_INET, &ping.dest_addr.sin_addr, ping.target_ip, sizeof(ping.target_ip));
 
+    //TODO: REFACTO
     if (ping.type == ICMP_TIMESTAMP) {
 	printf("PING %s (%s): sending timestamp requests\n", ping.target_host, ping.target_ip);
     } else {
