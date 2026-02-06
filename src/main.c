@@ -39,14 +39,16 @@ int setup_socket(t_ping *ping)
     return 0;
 }
 
+double get_time_now()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec + (tv.tv_usec / 1000000.0);
+}
+
 int main(int argc, char **argv)
 {
     t_ping ping;
-
-    // if (argc != 2) {
-    // dprintf(2, "Usage: %s <host>\n", argv[0]);
-    // return 1;
-    // }
 
     signal(SIGINT, signalHandler);
     init_ping_struct(&ping);
@@ -70,7 +72,15 @@ int main(int argc, char **argv)
     if (setup_socket(&ping) < 0)
 	return ERR_SOCKET;
 
+    double start_time = get_time_now();
+
     while (!g_signal) {
+
+	if (ping.deadline > 0) {
+	    double elapsed = get_time_now() - start_time;
+	    if (elapsed >= ping.deadline)
+		break;
+	}
 	if (send_ping(&ping) > 0) {
 	    ping.stats.pkts_transmitted++;
 	} else {
@@ -83,6 +93,11 @@ int main(int argc, char **argv)
 	    break;
 	}
 
+	if (ping.deadline > 0) {
+	    double elapsed = get_time_now() - start_time;
+	    if (elapsed >= ping.deadline)
+		break;
+	}
 	ping.seq++;
 	usleep(PING_INTERVAL);
     }

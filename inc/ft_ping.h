@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <limits.h>
 
 #define ERR_DNS -1
 #define ERR_SOCKET -2
@@ -55,6 +56,7 @@ typedef struct s_ping {
     int ttl;	  //  --ttl
     int type;	  // -t
     int count;	  //  -c
+    int deadline; // -w
 } t_ping;
 
 int resolve_dns(const char *host, struct sockaddr_in *dest);

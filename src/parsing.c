@@ -5,6 +5,27 @@
 #define OPT_TTL 1000
 #endif
 
+static int get_int_arg(const char *str, int min, int max, const char *flag_name)
+{
+    char *endptr;
+    long val;
+
+    errno = 0;
+    val = strtol(str, &endptr, 10);
+
+    if (errno != 0 || *endptr != '\0' || str == endptr) {
+	fprintf(stderr, "ft_ping: invalid argument: '%s'\n", str);
+	exit(EXIT_FAILURE);
+    }
+
+    if (val < min || val > max) {
+	fprintf(stderr, "ft_ping: invalid value for %s: %ld out of range [%d, %d]\n", flag_name,
+		val, min, max);
+	exit(EXIT_FAILURE);
+    }
+    return (int)val;
+}
+
 int parse_args(int argc, char **argv, t_ping *ping)
 {
     int opt;
@@ -14,9 +35,10 @@ int parse_args(int argc, char **argv, t_ping *ping)
 					   {"help", no_argument, 0, 'h'},
 					   {"type", required_argument, 0, 't'},
 					   {"ttl", required_argument, 0, OPT_TTL},
+					   {"timeout", required_argument, 0, 'w'},
 					   {0, 0, 0, 0}};
 
-    while ((opt = getopt_long(argc, argv, "hc:t:", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "w:hc:t:", long_options, &option_index)) != -1) {
 
 	switch (opt) {
 	case 'h':
@@ -46,16 +68,13 @@ int parse_args(int argc, char **argv, t_ping *ping)
 	    break;
 
 	case OPT_TTL: {
-	    char *endptr;
-	    long val = strtol(optarg, &endptr, 10);
-	    if (*endptr != '\0' || val < 0 || val > 255) {
-		fprintf(stderr, "ft_ping: invalid TTL: %s\n", optarg);
-		return EXIT_FAILURE;
-	    }
-	    ping->ttl = (int)val;
+	    ping->ttl = get_int_arg(optarg, 0, 255, "--ttl");
 	    break;
 	}
-
+	case 'w': {
+		ping->deadline = get_int_arg(optarg, 0, INT_MAX, "-w (timeout)");
+		break;
+	}
 	case '?':
 	    return EXIT_FAILURE;
 	}
