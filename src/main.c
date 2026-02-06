@@ -12,6 +12,7 @@ void init_ping_struct(t_ping *ping)
     ping->ttl = 64;
     ping->verbose = false;
     ping->count = -1;
+    ping->type = ICMP_ECHO;
 }
 
 int setup_socket(t_ping *ping)
@@ -30,6 +31,11 @@ int setup_socket(t_ping *ping)
 	return -1;
     }
 
+    if (setsockopt(ping->sockfd, IPPROTO_IP, IP_TTL, &ping->ttl, sizeof(ping->ttl)) < 0) {
+	perror("setsockopt ttl");
+	close(ping->sockfd);
+	return -1;
+    }
     return 0;
 }
 
@@ -54,11 +60,17 @@ int main(int argc, char **argv)
 
     inet_ntop(AF_INET, &ping.dest_addr.sin_addr, ping.target_ip, sizeof(ping.target_ip));
 
+    if (ping.type == ICMP_TIMESTAMP) {
+	printf("PING %s (%s): sending timestamp requests\n", ping.target_host, ping.target_ip);
+    } else {
+	printf("PING %s (%s): %ld data bytes\n", ping.target_host, ping.target_ip, PING_DATA_S);
+    }
+
     if (setup_socket(&ping) < 0)
 	return ERR_SOCKET;
 
     while (!g_signal) {
-	if (send_ping(ping.sockfd, &ping.dest_addr, ping.seq) > 0) {
+	if (send_ping(&ping) > 0) {
 	    ping.stats.pkts_transmitted++;
 	} else {
 	    // TODO: print error or maybe not
@@ -74,7 +86,7 @@ int main(int argc, char **argv)
 	usleep(PING_INTERVAL);
     }
 
-    print_final_stats(&ping);
+	print_final_stats(&ping);
     close(ping.sockfd);
 
     return SUCCESS;

@@ -21,8 +21,5 @@ int resolve_dns(const char *host, struct sockaddr_in *dest)
     dest->sin_addr = addr_in->sin_addr;
     freeaddrinfo(result);
 
-    char src_ip[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &dest->sin_addr, src_ip, sizeof(src_ip));
-    printf("PING %s (%s): %ld data bytes\n", host, src_ip, PING_DATA_S);
     return SUCCESS;
 }

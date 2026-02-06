@@ -31,11 +31,11 @@ void print_final_stats(t_ping *ping)
     printf("%ld packets transmitted, %ld packets received, %d%% packet loss\n",
 	   ping->stats.pkts_transmitted, ping->stats.pkts_received, loss_percent);
 
-    if (ping->stats.pkts_received > 0) {
+    if (ping->stats.pkts_received > 0 && ping->type == ICMP_ECHO) {
 	double avg = ping->stats.sum_rtt / ping->stats.pkts_received;
 
 	double variance = (ping->stats.sum_sq_rtt / ping->stats.pkts_received) - (avg * avg);
-	double mdev = sqrt(variance); 
+	double mdev = sqrt(variance);
 
 	printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", ping->stats.min_rtt, avg,
 	       ping->stats.max_rtt, mdev);

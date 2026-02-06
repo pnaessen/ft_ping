@@ -51,15 +51,16 @@ typedef struct s_ping {
     t_stats stats;
 
     bool verbose; //  -v
-    int ttl;	  //  -t
+    int ttl;	  //  --ttl
+    int type;	  // -t
     int count;	  //  -c
 } t_ping;
 
 int resolve_dns(const char *host, struct sockaddr_in *dest);
 
-void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq);
+void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq, int type);
 uint16_t calculate_checksum(void *addr, int len);
-ssize_t send_ping(int sockfd, struct sockaddr_in *dest, uint16_t seq);
+ssize_t send_ping(t_ping *ping);
 
 void handle_reception(t_ping *ping);
 

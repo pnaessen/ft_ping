@@ -1,22 +1,33 @@
 #include "ft_ping.h"
 
-ssize_t send_ping(int sockfd, struct sockaddr_in *dest, uint16_t seq)
+ssize_t send_ping(t_ping *ping)
 {
     t_ping_packet pkt;
-    init_ping_packet(&pkt, seq);
-    int bytes_send = sendto(sockfd, &pkt, sizeof(pkt), 0, (struct sockaddr *)dest, sizeof(*dest));
+    int packet_size;
+
+    init_ping_packet(&pkt, ping->seq, ping->type);
+
+    if (ping->type == ICMP_TIMESTAMP) {
+	packet_size = sizeof(struct icmphdr) + 12;
+    } else {
+	packet_size = sizeof(pkt);
+    }
+
+    int bytes_send = sendto(ping->sockfd, &pkt, packet_size, 0, (struct sockaddr *)&ping->dest_addr,
+			    sizeof(ping->dest_addr));
+
     if (bytes_send < 0) {
-	perror("Error bytes send\n");
+	perror("Error bytes send");
 	return -1;
     }
     return bytes_send;
 }
 
-void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq)
+void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq, int type)
 {
     memset(pkt, 0, sizeof(*pkt));
 
-    pkt->hdr.type = ICMP_ECHO;
+    pkt->hdr.type = type;
     pkt->hdr.code = 0;
     pkt->hdr.un.echo.id = htons(getpid() & 0xFFFF);
     pkt->hdr.un.echo.sequence = htons(seq);
