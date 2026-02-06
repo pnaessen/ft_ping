@@ -11,21 +11,17 @@ int parse_args(int argc, char **argv, t_ping *ping)
     int option_index = 0;
 
     static struct option long_options[] = {{"count", required_argument, 0, 'c'},
+					   {"help", no_argument, 0, 'h'},
 					   {"type", required_argument, 0, 't'},
 					   {"ttl", required_argument, 0, OPT_TTL},
 					   {0, 0, 0, 0}};
 
-    while ((opt = getopt_long(argc, argv, "c:t:", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "hc:t:", long_options, &option_index)) != -1) {
 
-		printf("%d\n", opt);
 	switch (opt) {
 	case 'h':
 	    usage(argv[0]);
 	    exit(EXIT_SUCCESS);
-
-	case 'v':
-	    ping->verbose = true;
-	    break;
 
 	case 'c': {
 	    char *endptr;
@@ -76,5 +72,5 @@ int parse_args(int argc, char **argv, t_ping *ping)
 
 void usage(const char *exec)
 {
-    dprintf(2, "Usage: %s  [-t TYPE] [-c NUMBER] <destination>\n", exec);
+    dprintf(2, "Usage: %s  [-t TYPE] [-c NUMBER] [--ttl NUMBER] <destination>\n", exec);
 }
