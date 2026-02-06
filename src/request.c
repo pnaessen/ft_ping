@@ -8,7 +8,7 @@ ssize_t send_ping(t_ping *ping)
     init_ping_packet(&pkt, ping->seq, ping->type);
 
     if (ping->type == ICMP_TIMESTAMP) {
-	packet_size = sizeof(struct icmphdr) + 12;
+	packet_size = sizeof(struct icmphdr) + PAYLOAD_TIMESTAMP;
     } else {
 	packet_size = sizeof(pkt);
     }
@@ -61,7 +61,7 @@ void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq, int type)
 
     if (type == ICMP_TIMESTAMP) {
 	fill_timestamp_payload(pkt);
-	total_size = sizeof(struct icmphdr) + 12;
+	total_size = sizeof(struct icmphdr) + PAYLOAD_TIMESTAMP;
     } else {
 	fill_echo_payload(pkt);
 	total_size = sizeof(*pkt);

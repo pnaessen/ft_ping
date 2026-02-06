@@ -25,6 +25,7 @@
 #define SUCCESS 0
 
 #define PING_PKT_S 64
+#define PAYLOAD_TIMESTAMP 12
 #define PING_DATA_S (PING_PKT_S - sizeof(struct icmphdr))
 #define PING_INTERVAL 1000000
 
