@@ -71,6 +71,6 @@ void update_stats(t_ping *ping, double rtt);
 void print_packet_info(t_ping *ping, struct iphdr *ip, struct icmphdr *icmp, double rtt,
 		       ssize_t bytes);
 
-int parse_args(int argc,char **argv, t_ping *ping);
+int parse_args(int argc, char **argv, t_ping *ping);
 void usage(const char *exec);
 #endif /* FT_PING_H */

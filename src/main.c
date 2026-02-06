@@ -2,12 +2,16 @@
 
 bool g_signal = false;
 
-void init_ping_struct(t_ping *ping, const char *host)
+void init_ping_struct(t_ping *ping)
 {
     memset(ping, 0, sizeof(t_ping));
-    ping->target_host = (char *)host;
+    ping->target_host = NULL;
     ping->stats.min_rtt = DBL_MAX;
     ping->stats.max_rtt = 0.0;
+
+    ping->ttl = 64;
+    ping->verbose = false;
+    ping->count = -1;
 }
 
 int setup_socket(t_ping *ping)
@@ -33,13 +37,13 @@ int main(int argc, char **argv)
 {
     t_ping ping;
 
-    if (argc != 2) {
-	dprintf(2, "Usage: %s <host>\n", argv[0]);
-	return 1;
-    }
+    // if (argc != 2) {
+    // dprintf(2, "Usage: %s <host>\n", argv[0]);
+    // return 1;
+    // }
 
     signal(SIGINT, signalHandler);
-    init_ping_struct(&ping, argv[1]);
+    init_ping_struct(&ping);
     if (parse_args(argc, argv, &ping) != 0) {
 	usage(argv[1]);
 	return 1;
@@ -61,6 +65,11 @@ int main(int argc, char **argv)
 	}
 
 	handle_reception(&ping);
+
+	if (ping.count > 0 && ping.stats.pkts_transmitted >= ping.count) {
+	    break;
+	}
+
 	ping.seq++;
 	usleep(PING_INTERVAL);
     }
