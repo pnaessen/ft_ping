@@ -57,6 +57,7 @@ static void process_time_exceeded(struct sockaddr_in *addr)
 {
     char sender[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &addr->sin_addr, sender, sizeof(sender));
+	//TODO: ADD BYTES and from _gateway
     printf("From %s: Time to live exceeded\n", sender);
 }
 
