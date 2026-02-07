@@ -5,6 +5,40 @@
 #define OPT_TTL 1000
 #endif
 
+static void parse_pattern_arg(const char *str, t_ping *ping)
+{
+    int len = strlen(str);
+    int i = 0;
+    int byte_idx = 0;
+
+    if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
+	i = 2;
+
+    while (str[i] && byte_idx < MAX_PATTERN_LEN) {
+	unsigned int val;
+
+	if (!isxdigit(str[i])) {
+	    fprintf(stderr, "ft_ping: error: non-hex character in pattern\n");
+	    exit(EXIT_FAILURE);
+	}
+
+	if (sscanf(&str[i], "%2x", &val) != 1)
+	    break;
+
+	ping->pattern[byte_idx] = (unsigned char)val;
+
+	i += 2;
+
+	if (i > len)
+	    i = len;
+
+	byte_idx++;
+    }
+
+    ping->pattern_len = byte_idx;
+    ping->pattern_set = true;
+}
+
 static int get_int_arg(const char *str, int min, int max, const char *flag_name)
 {
     char *endptr;
@@ -32,13 +66,14 @@ int parse_args(int argc, char **argv, t_ping *ping)
     int option_index = 0;
 
     static struct option long_options[] = {{"count", required_argument, 0, 'c'},
+					   {"pattern", required_argument, 0, 'p'},
 					   {"help", no_argument, 0, 'h'},
 					   {"type", required_argument, 0, 't'},
 					   {"ttl", required_argument, 0, OPT_TTL},
 					   {"timeout", required_argument, 0, 'w'},
 					   {0, 0, 0, 0}};
 
-    while ((opt = getopt_long(argc, argv, "w:hc:t:", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "w:hc:t:p:", long_options, &option_index)) != -1) {
 
 	switch (opt) {
 	case 'h':
@@ -72,9 +107,12 @@ int parse_args(int argc, char **argv, t_ping *ping)
 	    break;
 	}
 	case 'w': {
-		ping->deadline = get_int_arg(optarg, 0, INT_MAX, "-w (timeout)");
-		break;
+	    ping->deadline = get_int_arg(optarg, 0, INT_MAX, "-w (timeout)");
+	    break;
 	}
+	case 'p':
+	    parse_pattern_arg(optarg, ping);
+	    break;
 	case '?':
 	    return EXIT_FAILURE;
 	}

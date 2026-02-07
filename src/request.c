@@ -56,6 +56,7 @@ void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq, int type)
     pkt->hdr.code = 0;
     pkt->hdr.un.echo.id = htons(getpid() & 0xFFFF);
     pkt->hdr.un.echo.sequence = htons(seq);
+    pkt->hdr.checksum = 0;
 
     size_t total_size;
 

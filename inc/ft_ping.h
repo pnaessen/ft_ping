@@ -4,8 +4,10 @@
 #define FT_PING_HPP
 
 #include <arpa/inet.h>
+#include <ctype.h>
 #include <errno.h>
 #include <float.h>
+#include <limits.h>
 #include <math.h>
 #include <netdb.h>
 #include <netinet/ip_icmp.h>
@@ -19,12 +21,12 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <limits.h>
 
 #define ERR_DNS -1
 #define ERR_SOCKET -2
 #define SUCCESS 0
 
+#define MAX_PATTERN_LEN 16
 #define PING_PKT_S 64
 #define PAYLOAD_TIMESTAMP 12
 #define PING_DATA_S (PING_PKT_S - sizeof(struct icmphdr))
@@ -57,6 +59,9 @@ typedef struct s_ping {
     int type;	  // -t
     int count;	  //  -c
     int deadline; // -w
+    unsigned char pattern[MAX_PATTERN_LEN];
+    int pattern_len;
+    bool pattern_set;
 } t_ping;
 
 int resolve_dns(const char *host, struct sockaddr_in *dest);

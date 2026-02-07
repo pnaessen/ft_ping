@@ -57,6 +57,13 @@ int main(int argc, char **argv)
 	return 1;
     }
 
+    if (ping.pattern_set) {
+	printf("(%d bytes) : ", ping.pattern_len);
+	for (int i = 0; i < ping.pattern_len; i++) {
+	    printf("%02x", ping.pattern[i]);
+	}
+	printf("\n");
+    }
     if (resolve_dns(ping.target_host, &ping.dest_addr) != 0)
 	return ERR_DNS;
 
