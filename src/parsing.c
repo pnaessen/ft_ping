@@ -75,7 +75,7 @@ int parse_args(int argc, char **argv, t_ping *ping)
 					   {"help", no_argument, 0, '?'},
 					   {0, 0, 0, 0}};
 
-    while ((opt = getopt_long(argc, argv, "V?w:hc:t:p:", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "v?w:hc:t:p:", long_options, &option_index)) != -1) {
 
 	switch (opt) {
 	case 'h':

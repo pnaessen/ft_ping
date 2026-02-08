@@ -53,12 +53,38 @@ static void process_timestamp_reply(t_ping *ping, struct iphdr *ip, struct icmph
     ping->stats.pkts_received++;
 }
 
-static void process_time_exceeded(struct sockaddr_in *addr)
+// static void process_time_exceeded(struct sockaddr_in *addr)
+// {
+//     char sender[INET_ADDRSTRLEN];
+//     inet_ntop(AF_INET, &addr->sin_addr, sender, sizeof(sender));
+//     // TODO: ADD BYTES and from _gateway
+//     printf("From %s: Time to live exceeded\n", sender);
+// }
+
+int process_error_icmp(t_ping *ping, struct sockaddr_in *addr, struct icmphdr *icmp, ssize_t bytes)
 {
-    char sender[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &addr->sin_addr, sender, sizeof(sender));
-	//TODO: ADD BYTES and from _gateway
-    printf("From %s: Time to live exceeded\n", sender);
+    if (bytes < (ssize_t)(sizeof(struct icmphdr) + sizeof(struct iphdr) + 8))
+        return 0;
+
+    struct iphdr *inner_ip = (struct iphdr *)(icmp + 1);
+    struct icmphdr *inner_icmp = (struct icmphdr *)((char *)inner_ip + (inner_ip->ihl * 4));
+
+    if (ntohs(inner_icmp->un.echo.id) != (uint16_t)getpid())
+        return 0;
+
+    if (ping->verbose) {
+        char sender[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &addr->sin_addr, sender, sizeof(sender));
+
+        printf("From %s: icmp_seq=%d ", sender, ntohs(inner_icmp->un.echo.sequence));
+
+        if (icmp->type == ICMP_TIME_EXCEEDED)
+            printf("Time to live exceeded\n");
+        else if (icmp->type == ICMP_DEST_UNREACH)
+            printf("Destination Host Unreachable\n");
+    }
+
+    return 1;
 }
 
 void handle_reception(t_ping *ping)
@@ -92,9 +118,16 @@ void handle_reception(t_ping *ping)
 		process_timestamp_reply(ping, ip, icmp, bytes, &addr);
 		return;
 	    }
-	} else if (icmp->type == ICMP_TIME_EXCEEDED) {
-	    process_time_exceeded(&addr);
-	    return;
+	} else if (icmp->type == ICMP_TIME_EXCEEDED || icmp->type == ICMP_DEST_UNREACH) {
+	    if (process_error_icmp(ping, &addr, icmp, bytes)) {
+		return;
+	    }
 	}
+	// else {
+	// if (is_valid_id(icmp)) {
+	//     process_error_icmp(ping, &addr, icmp, bytes);
+	// 	return;
+	// }
+	// }
     }
 }
