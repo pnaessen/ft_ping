@@ -46,66 +46,77 @@ double get_time_now()
     return tv.tv_sec + (tv.tv_usec / 1000000.0);
 }
 
+void print_ping_header(t_ping *ping)
+{
+    if (ping->type == ICMP_TIMESTAMP) {
+	printf("PING %s (%s): sending timestamp requests\n", ping->target_host, ping->target_ip);
+    } else {
+	printf("PING %s (%s): %ld data bytes\n", ping->target_host, ping->target_ip, PING_DATA_S);
+    }
+}
+
+bool is_deadline_reached(t_ping *ping, double start_time)
+{
+    if (ping->deadline > 0) {
+	double elapsed = get_time_now() - start_time;
+	if (elapsed >= ping->deadline)
+	    return true;
+    }
+    return false;
+}
+
+int setup_target_and_socket(t_ping *ping)
+{
+    if (setup_socket(ping) < 0)
+	return ERR_SOCKET;
+
+    if (resolve_dns(ping->target_host, &ping->dest_addr) != 0) {
+	close(ping->sockfd);
+	return ERR_DNS;
+    }
+
+    inet_ntop(AF_INET, &ping->dest_addr.sin_addr, ping->target_ip, sizeof(ping->target_ip));
+
+    return SUCCESS;
+}
+
 int main(int argc, char **argv)
 {
     t_ping ping;
+    double start_time;
 
     signal(SIGINT, signalHandler);
     init_ping_struct(&ping);
+
     if (parse_args(argc, argv, &ping) != 0) {
 	usage(argv[0]);
-	return 1;
+	return EXIT_FAILURE;
     }
 
-    if (ping.pattern_set) {
-	printf("(%d bytes) : ", ping.pattern_len);
-	for (int i = 0; i < ping.pattern_len; i++) {
-	    printf("%02x", ping.pattern[i]);
-	}
-	printf("\n");
-    }
-    if (resolve_dns(ping.target_host, &ping.dest_addr) != 0)
-	return ERR_DNS;
+    if (setup_target_and_socket(&ping) != SUCCESS)
+	return EXIT_FAILURE;
 
-    inet_ntop(AF_INET, &ping.dest_addr.sin_addr, ping.target_ip, sizeof(ping.target_ip));
+    print_ping_header(&ping);
 
-    // TODO: REFACTO
-    if (ping.type == ICMP_TIMESTAMP) {
-	printf("PING %s (%s): sending timestamp requests\n", ping.target_host, ping.target_ip);
-    } else {
-	printf("PING %s (%s): %ld data bytes\n", ping.target_host, ping.target_ip, PING_DATA_S);
-    }
-
-    if (setup_socket(&ping) < 0)
-	return ERR_SOCKET;
-
-    double start_time = get_time_now();
+    start_time = get_time_now();
 
     while (!g_signal) {
+	if (is_deadline_reached(&ping, start_time))
+	    break;
 
-	if (ping.deadline > 0) {
-	    double elapsed = get_time_now() - start_time;
-	    if (elapsed >= ping.deadline)
-		break;
-	}
 	if (send_ping(&ping) > 0) {
 	    ping.stats.pkts_transmitted++;
 	} else {
-	    // TODO: print error or maybe not
+	    // fprintf(stderr, "sendto error\n");
 	}
 
 	handle_reception(&ping);
 
-	if (ping.count > 0 && ping.stats.pkts_transmitted >= ping.count) {
+	if (ping.count > 0 && ping.stats.pkts_transmitted >= ping.count)
 	    break;
-	}
 
-	if (ping.deadline > 0) {
-	    double elapsed = get_time_now() - start_time;
-	    if (elapsed >= ping.deadline)
-		break;
-	}
-	ping.seq++;
+	if (is_deadline_reached(&ping, start_time))
+	    break;
 	usleep(PING_INTERVAL);
     }
 

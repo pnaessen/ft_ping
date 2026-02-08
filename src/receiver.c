@@ -63,7 +63,7 @@ static void process_time_exceeded(struct sockaddr_in *addr)
 
 void handle_reception(t_ping *ping)
 {
-    char buffer[512];
+    char buffer[IP_MAXPACKET];
     struct sockaddr_in addr;
     socklen_t addr_len = sizeof(addr);
     ssize_t bytes;
