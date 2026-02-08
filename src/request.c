@@ -5,7 +5,7 @@ ssize_t send_ping(t_ping *ping)
     t_ping_packet pkt;
     int packet_size;
 
-    init_ping_packet(&pkt, ping->seq, ping->type);
+    init_ping_packet(&pkt, ping);
 
     if (ping->type == ICMP_TIMESTAMP) {
 	packet_size = sizeof(struct icmphdr) + PAYLOAD_TIMESTAMP;
@@ -36,35 +36,44 @@ static void fill_timestamp_payload(t_ping_packet *pkt)
     ptr[2] = 0;
 }
 
-static void fill_echo_payload(t_ping_packet *pkt)
+static void fill_echo_payload(t_ping_packet *pkt, t_ping *ping)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
 
     memcpy(pkt->msg, &tv, sizeof(tv));
 
-    for (size_t i = sizeof(struct timeval); i < PING_DATA_S; i++) {
-	pkt->msg[i] = (char)i;
+    size_t offset = sizeof(struct timeval);
+
+    if (ping->pattern_set) {
+	for (size_t i = offset; i < PING_DATA_S; i++) {
+
+	    pkt->msg[i] = ping->pattern[(i - offset) % ping->pattern_len];
+	}
+    } else {
+	for (size_t i = offset; i < PING_DATA_S; i++) {
+	    pkt->msg[i] = (char)i;
+	}
     }
 }
 
-void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq, int type)
+void init_ping_packet(t_ping_packet *pkt, t_ping *ping)
 {
     memset(pkt, 0, sizeof(*pkt));
 
-    pkt->hdr.type = type;
+    pkt->hdr.type = ping->type;
     pkt->hdr.code = 0;
     pkt->hdr.un.echo.id = htons(getpid() & 0xFFFF);
-    pkt->hdr.un.echo.sequence = htons(seq);
+    pkt->hdr.un.echo.sequence = htons(ping->seq);
     pkt->hdr.checksum = 0;
 
     size_t total_size;
 
-    if (type == ICMP_TIMESTAMP) {
+    if (ping->type == ICMP_TIMESTAMP) {
 	fill_timestamp_payload(pkt);
 	total_size = sizeof(struct icmphdr) + PAYLOAD_TIMESTAMP;
     } else {
-	fill_echo_payload(pkt);
+	fill_echo_payload(pkt, ping);
 	total_size = sizeof(*pkt);
     }
 

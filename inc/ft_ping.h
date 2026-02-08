@@ -66,7 +66,7 @@ typedef struct s_ping {
 
 int resolve_dns(const char *host, struct sockaddr_in *dest);
 
-void init_ping_packet(struct s_ping_packet *pkt, uint16_t seq, int type);
+void init_ping_packet(t_ping_packet *pkt, t_ping *ping);
 uint16_t calculate_checksum(void *addr, int len);
 ssize_t send_ping(t_ping *ping);
 
