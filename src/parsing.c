@@ -71,9 +71,11 @@ int parse_args(int argc, char **argv, t_ping *ping)
 					   {"type", required_argument, 0, 't'},
 					   {"ttl", required_argument, 0, OPT_TTL},
 					   {"timeout", required_argument, 0, 'w'},
+					   {"verbose", no_argument, 0, 'v'},
+					   {"help", no_argument, 0, '?'},
 					   {0, 0, 0, 0}};
 
-    while ((opt = getopt_long(argc, argv, "w:hc:t:p:", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "V?w:hc:t:p:", long_options, &option_index)) != -1) {
 
 	switch (opt) {
 	case 'h':
@@ -112,6 +114,9 @@ int parse_args(int argc, char **argv, t_ping *ping)
 	}
 	case 'p':
 	    parse_pattern_arg(optarg, ping);
+	    break;
+	case 'v':
+	    ping->verbose = true;
 	    break;
 	case '?':
 	    return EXIT_FAILURE;
