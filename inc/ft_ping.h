@@ -81,7 +81,7 @@ void print_packet_info(t_ping *ping, struct iphdr *ip, struct icmphdr *icmp, dou
 		       ssize_t bytes);
 
 int parse_args(int argc, char **argv, t_ping *ping);
-void dump_ip_header(struct iphdr *ip);
+void print_packet_debug(struct iphdr *ip, struct icmphdr *icmp);
 void usage(const char *exec);
 
 #endif /* FT_PING_H */

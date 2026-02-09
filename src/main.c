@@ -49,10 +49,14 @@ double get_time_now()
 void print_ping_header(t_ping *ping)
 {
     if (ping->type == ICMP_TIMESTAMP) {
-	printf("PING %s (%s): sending timestamp requests\n", ping->target_host, ping->target_ip);
+	printf("PING %s (%s): sending timestamp requests", ping->target_host, ping->target_ip);
     } else {
-	printf("PING %s (%s): %ld data bytes\n", ping->target_host, ping->target_ip, PING_DATA_S);
+	printf("PING %s (%s): %ld data bytes", ping->target_host, ping->target_ip, PING_DATA_S);
     }
+    if(ping->verbose && ping->type == ICMP_ECHO) {
+        printf("id 0x%4x = %d", getpid(), getpid());
+    }
+    printf("\n");
 }
 
 bool is_deadline_reached(t_ping *ping, double start_time)
