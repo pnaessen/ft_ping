@@ -132,10 +132,3 @@ int parse_args(int argc, char **argv, t_ping *ping)
     return EXIT_SUCCESS;
 }
 
-void usage(const char *exec)
-{
-    dprintf(2,
-	    "Usage: %s [-p HEXA_PATTERN] [-w NUMBER] [--help] [-t TYPE] [-c NUMBER] [--ttl NUMBER] "
-	    "<destination>\n",
-	    exec);
-}

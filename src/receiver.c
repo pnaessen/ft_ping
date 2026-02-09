@@ -56,14 +56,6 @@ static void process_timestamp_reply(t_ping *ping, struct iphdr *ip, struct icmph
     ping->stats.pkts_received++;
 }
 
-// static void process_time_exceeded(struct sockaddr_in *addr)
-// {
-//     char sender[INET_ADDRSTRLEN];
-//     inet_ntop(AF_INET, &addr->sin_addr, sender, sizeof(sender));
-//     // TODO: ADD BYTES and from _gateway
-//     printf("From %s: Time to live exceeded\n", sender);
-// }
-
 int process_error_icmp(t_ping *ping, struct sockaddr_in *addr, struct icmphdr *icmp, ssize_t bytes)
 {
     if (bytes < (ssize_t)(sizeof(struct icmphdr) + sizeof(struct iphdr) + 8))
@@ -136,47 +128,5 @@ void handle_reception(t_ping *ping)
 		return;
 	    }
 	}
-	// else {
-	// if (is_valid_id(icmp)) {
-	//     process_error_icmp(ping, &addr, icmp, bytes);
-	// 	return;
-	// }
-	// }
     }
-}
-
-int print_ip_dump(struct iphdr *ip)
-{
-    int hlen = ip->ihl * 4;
-    unsigned short *ptr = (unsigned short *)ip;
-
-    printf("IP Hdr Dump:\n ");
-    for (int i = 0; i < hlen / 2; i++) {
-	printf("%04x ", ntohs(ptr[i]));
-    }
-    printf("\n");
-    return hlen;
-}
-
-void print_packet_debug(struct iphdr *ip, struct icmphdr *icmp)
-{
-    int ip_header_len = print_ip_dump(ip);
-
-    uint16_t val_frag = ntohs(ip->frag_off);
-    unsigned int flags = (val_frag >> 13) & 0x07;
-    unsigned int offset = val_frag & 0x1FFF;
-    char src[INET_ADDRSTRLEN], dst[INET_ADDRSTRLEN];
-
-    inet_ntop(AF_INET, &ip->saddr, src, sizeof(src));
-    inet_ntop(AF_INET, &ip->daddr, dst, sizeof(dst));
-
-    printf("Vr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst     Data\n");
-    printf(" %1x  %1x  %02x %04x %04x   %1x %04x  %02x  %02x %04x %-15s %-15s\n", ip->version,
-	   ip->ihl, ip->tos, ntohs(ip->tot_len), ntohs(ip->id), flags, offset, ip->ttl,
-	   ip->protocol, ntohs(ip->check), src, dst);
-
-    int icmp_size = ntohs(ip->tot_len) - ip_header_len;
-
-    printf("ICMP: type %u, code %u, size %u, id 0x%04x, seq 0x%04x\n", icmp->type, icmp->code,
-	   icmp_size, ntohs(icmp->un.echo.id), ntohs(icmp->un.echo.sequence));
 }

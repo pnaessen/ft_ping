@@ -89,4 +89,8 @@ void print_ping_header(t_ping *ping);
 bool is_deadline_reached(t_ping *ping, double start_time);
 double get_time_now();
 
+int setup_target_and_socket(t_ping *ping);
+int setup_socket(t_ping *ping);
+void init_ping_struct(t_ping *ping);
+
 #endif /* FT_PING_H */
