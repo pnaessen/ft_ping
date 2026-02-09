@@ -41,11 +41,14 @@ static void process_timestamp_reply(t_ping *ping, struct iphdr *ip, struct icmph
 	uint32_t rtime = ntohl(ptr[1]);
 	uint32_t ttime = ntohl(ptr[2]);
 
-	printf("%ld bytes from %s:  icmp_seq=%d\n", bytes, sender,
-	       ntohs(icmp->un.echo.sequence));
+	printf("%ld bytes from %s:  icmp_seq=%d\n", bytes, sender, ntohs(icmp->un.echo.sequence));
 	printf("icmp_otime = %u\n", otime);
 	printf("icmp_rtime = %u\n", rtime);
 	printf("icmp_ttime = %u\n", ttime);
+	if (ping->verbose) {
+	    long long diff = (long long)rtime - (long long)otime;
+	    printf("difference = %lld ms\n", diff);
+	}
     } else {
 	printf("Malformed Timestamp Reply received\n");
     }

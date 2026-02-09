@@ -110,6 +110,7 @@ int main(int argc, char **argv)
 
 	if (send_ping(&ping) > 0) {
 	    ping.stats.pkts_transmitted++;
+        ping.seq++;
 	} else {
 	    // fprintf(stderr, "sendto error\n");
 	}
