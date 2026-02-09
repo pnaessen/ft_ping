@@ -61,27 +61,38 @@ static void process_timestamp_reply(t_ping *ping, struct iphdr *ip, struct icmph
 //     printf("From %s: Time to live exceeded\n", sender);
 // }
 
-int process_error_icmp(t_ping *ping, struct sockaddr_in *addr, struct icmphdr *icmp, ssize_t bytes)
+int process_error_icmp(t_ping *ping, struct sockaddr_in *addr, struct icmphdr *icmp, ssize_t bytes,
+		       struct iphdr *ip)
 {
     if (bytes < (ssize_t)(sizeof(struct icmphdr) + sizeof(struct iphdr) + 8))
-        return 0;
+	return 0;
 
     struct iphdr *inner_ip = (struct iphdr *)(icmp + 1);
     struct icmphdr *inner_icmp = (struct icmphdr *)((char *)inner_ip + (inner_ip->ihl * 4));
 
     if (ntohs(inner_icmp->un.echo.id) != (uint16_t)getpid())
-        return 0;
+	return 0;
+
+    char sender[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &addr->sin_addr, sender, sizeof(sender));
+
+    char host[NI_MAXHOST];
+    int s = getnameinfo((struct sockaddr *)addr, sizeof(struct sockaddr_in), host, sizeof(host),
+			NULL, 0, NI_NAMEREQD);
+    if (s != 0)
+	memcpy(host, "can't resolve dns", 18);
+    printf("%ld bytes From %s (%s): ", bytes - sizeof(struct iphdr), host, sender);
+
+    if (icmp->type == ICMP_TIME_EXCEEDED)
+	printf("Time to live exceeded\n");
 
     if (ping->verbose) {
-        char sender[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &addr->sin_addr, sender, sizeof(sender));
 
-        printf("From %s: icmp_seq=%d ", sender, ntohs(inner_icmp->un.echo.sequence));
-
-        if (icmp->type == ICMP_TIME_EXCEEDED)
-            printf("Time to live exceeded\n");
-        else if (icmp->type == ICMP_DEST_UNREACH)
-            printf("Destination Host Unreachable\n");
+	if (icmp->type == ICMP_DEST_UNREACH)
+	    printf("Destination Host Unreachable\n");
+	else if (icmp->type == ICMP_TIME_EXCEEDED) {
+	    dump_ip_header(ip);
+	}
     }
 
     return 1;
@@ -119,7 +130,7 @@ void handle_reception(t_ping *ping)
 		return;
 	    }
 	} else if (icmp->type == ICMP_TIME_EXCEEDED || icmp->type == ICMP_DEST_UNREACH) {
-	    if (process_error_icmp(ping, &addr, icmp, bytes)) {
+	    if (process_error_icmp(ping, &addr, icmp, bytes, ip)) {
 		return;
 	    }
 	}
@@ -130,4 +141,34 @@ void handle_reception(t_ping *ping)
 	// }
 	// }
     }
+}
+
+void print_ip_dump(struct iphdr *ip)
+{
+    int hlen = ip->ihl * 4;
+    unsigned short *ptr = (unsigned short *)ip;
+
+    printf("IP Hdr Dump:\n ");
+    for (int i = 0; i < hlen / 2; i++) {
+	printf("%04x ", ntohs(ptr[i]));
+    }
+    printf("\n");
+}
+
+void dump_ip_header(struct iphdr *ip)
+{
+    print_ip_dump(ip);
+    uint16_t val_frag = ntohs(ip->frag_off);
+    unsigned int flags = (val_frag >> 13) & 0x07;
+    unsigned int offset = val_frag & 0x1FFF;
+
+    char src[INET_ADDRSTRLEN];
+    char dst[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &ip->saddr, src, sizeof(src));
+    inet_ntop(AF_INET, &ip->daddr, dst, sizeof(dst));
+
+    printf("Vr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst     Data\n");
+    printf(" %1x  %1x  %02x %04x %04x   %1x %04x  %02x  %02x %04x %-15s %-15s\n", ip->version,
+	   ip->ihl, ip->tos, ntohs(ip->tot_len), ntohs(ip->id), flags, offset, ip->ttl,
+	   ip->protocol, ntohs(ip->check), dst, src);
 }
