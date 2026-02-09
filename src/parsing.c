@@ -79,8 +79,7 @@ int parse_args(int argc, char **argv, t_ping *ping)
 
 	switch (opt) {
 	case 'h':
-	    // TODO: better print usage
-	    usage(argv[0]);
+	    print_help();
 	    exit(EXIT_SUCCESS);
 
 	case 'c': {

@@ -42,8 +42,8 @@ void print_final_stats(t_ping *ping)
     }
 }
 
-
-void print_help() {
+void print_help()
+{
 
     printf("\n Usage: ping [OPTION...] HOST ...\n");
     printf("Send ICMP ECHO_REQUEST packets to network hosts.\n\n");
@@ -52,4 +52,15 @@ void print_help() {
     printf("    --echo          send ICMP_ECHO packets (default)\n");
     printf("-t, --type=TYPE     send TYPE packets\n\n");
     printf("Options valide for all request types:\n\n");
+    printf("-c, --count=NUMBER         stop after sending NUMBER packets\n");
+    printf("-w, --timeout=N            stop after N seconds\n");
+    printf("-p, --pattern=PATTERN      fill ICMP packet with given pattern (hex)\n");
+    printf("-v, --verbose              verbose output\n");
+    printf("--ttl, -ttl                set IP headears to N ttl\n");
+    printf("-?, --help                 give this help list\n\n");
+    printf("Mandatory or optional arguments to long options are also mandatory or optional\n");
+    printf("for any corresponding short options.\n\n");
+    printf("Options marked with (root only) are available only to superuser.\n\n");
+    printf("Report bugs to <bocal@42.lyon.fr>.");
+
 }

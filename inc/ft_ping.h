@@ -83,5 +83,6 @@ void print_packet_info(t_ping *ping, struct iphdr *ip, struct icmphdr *icmp, dou
 int parse_args(int argc, char **argv, t_ping *ping);
 void print_packet_debug(struct iphdr *ip, struct icmphdr *icmp);
 void usage(const char *exec);
+void print_help();
 
 #endif /* FT_PING_H */
