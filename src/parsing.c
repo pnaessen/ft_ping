@@ -79,6 +79,7 @@ int parse_args(int argc, char **argv, t_ping *ping)
 
 	switch (opt) {
 	case 'h':
+	//TODO: better print usage
 	    usage(argv[0]);
 	    exit(EXIT_SUCCESS);
 
@@ -134,5 +135,5 @@ int parse_args(int argc, char **argv, t_ping *ping)
 
 void usage(const char *exec)
 {
-    dprintf(2, "Usage: %s  [-t TYPE] [-c NUMBER] [--ttl NUMBER] <destination>\n", exec);
+    dprintf(2, "Usage: %s [-p HEXA_PATTERN] [-w NUMBER] [--help] [-t TYPE] [-c NUMBER] [--ttl NUMBER] <destination>\n", exec);
 }
