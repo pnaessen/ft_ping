@@ -41,3 +41,15 @@ void print_final_stats(t_ping *ping)
 	       ping->stats.max_rtt, mdev);
     }
 }
+
+
+void print_help() {
+
+    printf("\n Usage: ping [OPTION...] HOST ...\n");
+    printf("Send ICMP ECHO_REQUEST packets to network hosts.\n\n");
+    printf("Options controlling ICMP request types:\n");
+    printf("    --timestamp     send ICMP_TIMESTAMP packets\n");
+    printf("    --echo          send ICMP_ECHO packets (default)\n");
+    printf("-t, --type=TYPE     send TYPE packets\n\n");
+    printf("Options valide for all request types:\n\n");
+}
