@@ -84,5 +84,9 @@ int parse_args(int argc, char **argv, t_ping *ping);
 void print_packet_debug(struct iphdr *ip, struct icmphdr *icmp);
 void usage(const char *exec);
 void print_help();
+void print_ping_header(t_ping *ping);
+
+bool is_deadline_reached(t_ping *ping, double start_time);
+double get_time_now();
 
 #endif /* FT_PING_H */

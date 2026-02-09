@@ -39,36 +39,6 @@ int setup_socket(t_ping *ping)
     return 0;
 }
 
-double get_time_now()
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return tv.tv_sec + (tv.tv_usec / 1000000.0);
-}
-
-void print_ping_header(t_ping *ping)
-{
-    if (ping->type == ICMP_TIMESTAMP) {
-	printf("PING %s (%s): sending timestamp requests", ping->target_host, ping->target_ip);
-    } else {
-	printf("PING %s (%s): %ld data bytes", ping->target_host, ping->target_ip, PING_DATA_S);
-    }
-    if(ping->verbose && ping->type == ICMP_ECHO) {
-        printf("id 0x%4x = %d", getpid(), getpid());
-    }
-    printf("\n");
-}
-
-bool is_deadline_reached(t_ping *ping, double start_time)
-{
-    if (ping->deadline > 0) {
-	double elapsed = get_time_now() - start_time;
-	if (elapsed >= ping->deadline)
-	    return true;
-    }
-    return false;
-}
-
 int setup_target_and_socket(t_ping *ping)
 {
     if (setup_socket(ping) < 0)
@@ -110,7 +80,7 @@ int main(int argc, char **argv)
 
 	if (send_ping(&ping) > 0) {
 	    ping.stats.pkts_transmitted++;
-        ping.seq++;
+	    ping.seq++;
 	} else {
 	    // fprintf(stderr, "sendto error\n");
 	}
