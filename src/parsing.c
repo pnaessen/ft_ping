@@ -17,11 +17,13 @@ static void parse_pattern_arg(const char *str, t_ping *ping)
     while (str[i] && byte_idx < MAX_PATTERN_LEN) {
 	unsigned int val;
 	int chars_left = len - i;
+	int chars_to_parse = (chars_left >= 2) ? 2 : 1;
 
-	if (!isxdigit((unsigned char)str[i]) ||
-	    (chars_left > 1 && !isxdigit((unsigned char)str[i + 1]))) {
-	    fprintf(stderr, "ft_ping: error: non-hex character in pattern\n");
-	    exit(EXIT_FAILURE);
+	for (int j = 0; j < chars_to_parse; j++) {
+	    if (!isxdigit((unsigned char)str[i + j])) {
+		fprintf(stderr, "ft_ping: error: non-hex character in pattern\n");
+		exit(EXIT_FAILURE);
+	    }
 	}
 
 	if (sscanf(&str[i], "%2x", &val) != 1)
@@ -29,10 +31,7 @@ static void parse_pattern_arg(const char *str, t_ping *ping)
 
 	ping->pattern[byte_idx] = (unsigned char)val;
 
-	i += 2;
-
-	if (i > len)
-	    i = len;
+	i += chars_to_parse;
 
 	byte_idx++;
     }

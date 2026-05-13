@@ -80,7 +80,7 @@ static void test_init_ping_struct_defaults(void)
 static void test_parse_args_success(void)
 {
     char *argv[] = {"ft_ping", "-v", "-c", "3", "--ttl", "42", "-t", "timestamp", "-w", "5",
-		    "-p", "ABCD", "example.com", NULL};
+                    "-p", "ABCD", "example.com", NULL};
     t_ping ping;
 
     init_ping_struct(&ping);
@@ -167,8 +167,8 @@ static void test_calculate_checksum(void)
 static void test_calculate_rtt(void)
 {
     struct {
-	struct icmphdr hdr;
-	struct timeval sent_at;
+        struct icmphdr hdr;
+        struct timeval sent_at;
     } packet;
     struct timeval now;
     double rtt;
