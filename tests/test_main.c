@@ -80,7 +80,7 @@ static void test_init_ping_struct_defaults(void)
 static void test_parse_args_success(void)
 {
     char *argv[] = {"ft_ping", "-v", "-c", "3", "--ttl", "42", "-t", "timestamp", "-w", "5",
-		    "-p", "0xABCD", "example.com", NULL};
+		    "-p", "ABCD", "example.com", NULL};
     t_ping ping;
 
     init_ping_struct(&ping);
@@ -95,6 +95,18 @@ static void test_parse_args_success(void)
     CHECK(ping.pattern[0] == 0xAB);
     CHECK(ping.pattern[1] == 0xCD);
     CHECK(strcmp(ping.target_host, "example.com") == 0);
+}
+
+static void test_parse_args_pattern_prefix(void)
+{
+    char *argv[] = {"ft_ping", "-p", "0xABCD", "example.com", NULL};
+    t_ping ping;
+
+    init_ping_struct(&ping);
+    CHECK(parse_with_args(argv, &ping) == EXIT_SUCCESS);
+    CHECK(ping.pattern_len == 2);
+    CHECK(ping.pattern[0] == 0xAB);
+    CHECK(ping.pattern[1] == 0xCD);
 }
 
 static void test_parse_args_failures(void)
@@ -164,11 +176,11 @@ static void test_calculate_rtt(void)
     memset(&packet, 0, sizeof(packet));
     gettimeofday(&now, NULL);
     packet.sent_at = now;
-    packet.sent_at.tv_usec -= 250000;
-    if (packet.sent_at.tv_usec < 0) {
+    if (packet.sent_at.tv_usec < 250000) {
 	packet.sent_at.tv_sec -= 1;
 	packet.sent_at.tv_usec += 1000000;
     }
+    packet.sent_at.tv_usec -= 250000;
 
     rtt = calculate_rtt(&packet.hdr);
     CHECK(rtt >= 100.0);
@@ -262,6 +274,7 @@ int main(void)
 {
     test_init_ping_struct_defaults();
     test_parse_args_success();
+    test_parse_args_pattern_prefix();
     test_parse_args_failures();
     test_parse_args_pattern_truncation();
     test_is_deadline_reached();
@@ -274,8 +287,8 @@ int main(void)
     test_resolve_dns_numeric_host();
 
     if (g_failures != 0) {
-	fprintf(stderr, "%d test(s) failed\n", g_failures);
-	return EXIT_FAILURE;
+        fprintf(stderr, "%d test(s) failed\n", g_failures);
+        return EXIT_FAILURE;
     }
 
     printf("All tests passed\n");
