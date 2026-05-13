@@ -166,6 +166,7 @@ static void test_calculate_checksum(void)
 
 static void test_calculate_rtt(void)
 {
+    const suseconds_t offset_usec = 250000;
     struct {
         struct icmphdr hdr;
         struct timeval sent_at;
@@ -176,11 +177,11 @@ static void test_calculate_rtt(void)
     memset(&packet, 0, sizeof(packet));
     gettimeofday(&now, NULL);
     packet.sent_at = now;
-    if (packet.sent_at.tv_usec < 250000) {
+    if (packet.sent_at.tv_usec < offset_usec) {
 	packet.sent_at.tv_sec -= 1;
 	packet.sent_at.tv_usec += 1000000;
     }
-    packet.sent_at.tv_usec -= 250000;
+    packet.sent_at.tv_usec -= offset_usec;
 
     rtt = calculate_rtt(&packet.hdr);
     CHECK(rtt >= 100.0);
