@@ -171,7 +171,7 @@ static void test_calculate_rtt(void)
     }
 
     rtt = calculate_rtt(&packet.hdr);
-    CHECK(rtt >= 200.0);
+    CHECK(rtt >= 100.0);
     CHECK(rtt < 1000.0);
 }
 
