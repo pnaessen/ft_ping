@@ -18,8 +18,8 @@ static void parse_pattern_arg(const char *str, t_ping *ping)
 	unsigned int val;
 	int chars_left = len - i;
 
-	if (!isxdigit((unsigned char)str[i]) ||
-	    (chars_left > 1 && !isxdigit((unsigned char)str[i + 1]))) {
+        if (!isxdigit((unsigned char)str[i]) ||
+            (chars_left > 1 && !isxdigit((unsigned char)str[i + 1]))) {
 	    fprintf(stderr, "ft_ping: error: non-hex character in pattern\n");
 	    exit(EXIT_FAILURE);
 	}

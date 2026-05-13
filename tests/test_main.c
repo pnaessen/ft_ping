@@ -8,10 +8,10 @@ static int g_failures = 0;
 
 #define CHECK(condition)                                                                         \
     do {                                                                                         \
-	if (!(condition)) {                                                                      \
-	    fprintf(stderr, "FAIL:%s:%d: %s\n", __FILE__, __LINE__, #condition);                \
-	    g_failures++;                                                                        \
-	}                                                                                        \
+        if (!(condition)) {                                                                      \
+            fprintf(stderr, "FAIL:%s:%d: %s\n", __FILE__, __LINE__, #condition);                \
+            g_failures++;                                                                        \
+        }                                                                                        \
     } while (0)
 
 static int argv_len(char **argv)
@@ -19,7 +19,7 @@ static int argv_len(char **argv)
     int len = 0;
 
     while (argv[len] != NULL)
-	len++;
+        len++;
     return len;
 }
 
@@ -41,18 +41,18 @@ static void expect_parse_exit_failure(char **argv)
 
     CHECK(pid >= 0);
     if (pid == 0) {
-	int devnull = open("/dev/null", O_WRONLY);
+        int devnull = open("/dev/null", O_WRONLY);
 
-	if (devnull >= 0) {
-	    dup2(devnull, STDERR_FILENO);
-	    close(devnull);
-	}
+        if (devnull >= 0) {
+            dup2(devnull, STDERR_FILENO);
+            close(devnull);
+        }
 
-	t_ping ping;
-	init_ping_struct(&ping);
-	reset_getopt_state();
-	parse_args(argv_len(argv), argv, &ping);
-	_exit(EXIT_SUCCESS);
+        t_ping ping;
+        init_ping_struct(&ping);
+        reset_getopt_state();
+        parse_args(argv_len(argv), argv, &ping);
+        _exit(EXIT_SUCCESS);
     }
 
     int status = 0;
@@ -208,7 +208,7 @@ static void test_init_ping_packet_echo_default_payload(void)
     sent_at = (struct timeval *)pkt.msg;
     CHECK(sent_at->tv_sec > 0);
     for (size_t i = sizeof(struct timeval); i < PING_DATA_S; i++)
-	CHECK((unsigned char)pkt.msg[i] == (unsigned char)i);
+        CHECK((unsigned char)pkt.msg[i] == (unsigned char)i);
 }
 
 static void test_init_ping_packet_echo_pattern_payload(void)
@@ -226,7 +226,8 @@ static void test_init_ping_packet_echo_pattern_payload(void)
     init_ping_packet(&pkt, &ping);
 
     for (size_t i = sizeof(struct timeval); i < PING_DATA_S; i++)
-	CHECK((unsigned char)pkt.msg[i] == pattern[(i - sizeof(struct timeval)) % sizeof(pattern)]);
+        CHECK((unsigned char)pkt.msg[i] ==
+              pattern[(i - sizeof(struct timeval)) % sizeof(pattern)]);
 }
 
 static void test_init_ping_packet_timestamp_payload(void)
